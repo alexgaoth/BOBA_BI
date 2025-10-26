@@ -1,0 +1,12 @@
+# Boba BI Dependencies
+
+# Core requirement
+anthropic>=0.34.0
+
+# Optional: For production enhancements
+# flask>=3.0.0              # For REST API wrapper
+# requests>=2.31.0          # For real weather API calls
+# python-dotenv>=1.0.0      # For environment variable management
+# sqlalchemy>=2.0.0         # For database integration
+# pandas>=2.0.0             # For advanced data analysis
+# plotly>=5.18.0            # For data visualization

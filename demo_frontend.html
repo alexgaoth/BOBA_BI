@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boba BI - Staff Scheduler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .query-section {
+            margin-bottom: 30px;
+        }
+        
+        .query-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .query-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .query-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        .insights {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .insights h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .insight-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .schedule-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .schedule-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .schedule-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .badge-morning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-evening {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .staff-optimal {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .staff-warning {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        
+        .staff-critical {
+            color: #dc3545;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧋 Boba BI</h1>
+            <p>AI-Powered Staff Scheduling for Your Boba Shop</p>
+        </div>
+        
+        <div class="content">
+            <div class="query-section">
+                <label for="query">Ask Your Scheduling Question:</label>
+                <input 
+                    type="text" 
+                    id="query" 
+                    class="query-input" 
+                    placeholder="How should I schedule my employees for next week?"
+                    value="How should I schedule my employees for next week to handle traffic efficiently?"
+                >
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="generateSchedule()">
+                    Generate Schedule
+                </button>
+                <button class="btn btn-secondary" onclick="downloadCSV()">
+                    Download CSV
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI agents analyzing your data and generating optimal schedule...</p>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="insights">
+                    <h3>📊 Insights</h3>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <h4>Traffic Analysis</h4>
+                            <p id="trafficAnalysis">Loading...</p>
+                        </div>
+                        <div class="insight-card">
+                            <h4>Weather Impact</h4>
+                            <p id="weatherAnalysis">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>📅 Weekly Schedule</h3>
+                <table class="schedule-table" id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Shift</th>
+                            <th>Time</th>
+                            <th>Orders/Hr</th>
+                            <th>Staffing</th>
+                            <th>Employees</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                        <!-- Schedule rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-detect API URL based on environment
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:5000'
+            : `${window.location.protocol}//${window.location.hostname.replace('-8000', '-5000')}`;
+
+        console.log('🔧 API URL:', API_URL);
+        console.log('🌐 Current location:', window.location.href);
+
+        async function generateSchedule() {
+            const query = document.getElementById('query').value;
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            // Show loading
+            loading.classList.add('active');
+            results.classList.remove('active');
+            
+            try {
+                console.log('📡 Sending request to:', `${API_URL}/api/schedule`);
+
+                const response = await fetch(`${API_URL}/api/schedule`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                console.log('📥 Response status:', response.status);
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('❌ API Error:', error);
+                alert(`Failed to connect to API server at ${API_URL}\n\nError: ${error.message}\n\nCheck browser console for details.`);
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+        
+        function displayResults(data) {
+            // Display insights
+            document.getElementById('trafficAnalysis').textContent = 
+                data.traffic_analysis.substring(0, 200) + '...';
+            document.getElementById('weatherAnalysis').textContent = 
+                data.weather_analysis.substring(0, 200) + '...';
+            
+            // Display schedule
+            const tbody = document.getElementById('scheduleBody');
+            tbody.innerHTML = '';
+            
+            data.schedule.forEach(shift => {
+                const row = document.createElement('tr');
+                
+                const staffStatus = shift.staff_assigned >= shift.staff_needed ? 'staff-optimal' :
+                                  shift.staff_assigned >= Math.floor(shift.staff_needed * 0.8) ? 'staff-warning' :
+                                  'staff-critical';
+                
+                row.innerHTML = `
+                    <td>${shift.date}</td>
+                    <td><strong>${shift.day}</strong></td>
+                    <td><span class="badge badge-${shift.shift}">${shift.shift}</span></td>
+                    <td>${shift.shift_time}</td>
+                    <td>${shift.predicted_orders_per_hour}</td>
+                    <td class="${staffStatus}">${shift.staff_assigned}/${shift.staff_needed}</td>
+                    <td>${shift.employees.join(', ') || 'UNDERSTAFFED'}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Show results
+            document.getElementById('results').classList.add('active');
+        }
+        
+        async function downloadCSV() {
+            const query = document.getElementById('query').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/schedule/download`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `boba_bi_schedule_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (error) {
+                alert('Failed to download CSV. Make sure the API server is running.');
+                console.error(error);
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('query').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateSchedule();
+            }
+        });
+    </script>
+</body>
+</html>
