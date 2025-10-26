@@ -21,8 +21,8 @@ from collections import defaultdict
 # CONFIGURATION
 # ============================================================================
 
-ANTHROPIC_API_KEY = "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"  # Replace with actual API key
-PARALLEL_API_KEY = "C8f8vbPIU0wI0-L0a7RuoUhgGLlPtJ61cW1-scnp"  # Parallel API for weather/external data
+ANTHROPIC_API_KEY = "" # Replace with actual API key
+PARALLEL_API_KEY = ""  # Parallel API for weather/external data
 SHOP_LOCATION = "San Diego, CA"
 FIXED_SHIFTS = {
     "morning": {"start": "08:00", "end": "16:00", "hours": 8},
