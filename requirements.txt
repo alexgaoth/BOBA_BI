@@ -10,3 +10,7 @@ anthropic>=0.34.0
 # sqlalchemy>=2.0.0         # For database integration
 # pandas>=2.0.0             # For advanced data analysis
 # plotly>=5.18.0            # For data visualization
+
+# Supabase integration
+supabase>=2.0.0
+postgrest-py>=0.16.0
